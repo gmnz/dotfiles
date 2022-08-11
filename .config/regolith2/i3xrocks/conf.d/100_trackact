@@ -1,0 +1,3 @@
+[own]
+command=bash $HOME/.config/regolith2/i3xrocks/scripts/trackact
+interval=1
