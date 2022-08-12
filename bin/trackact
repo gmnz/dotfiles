@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+cur_time=$(date +%s)
+
+save_path="$HOME/time-tracking"
+if [[ ! -d $save_path ]]; then
+	mkdir -p $save_path
+fi
+
+file_name=$(date +"%Y_%m_%d_%H_%M_%S")
+
+i=0
+last=
+
+xprop -root -spy _NET_ACTIVE_WINDOW | while :
+do
+    read line
+
+    #[[ -z "$last" ]] || i3-msg "[id=$last] mark _last"
+    #[[ -z "$last" ]] || echo $last
+    last=$(echo "$line" | awk -F' ' '{printf $NF}')
+    #last=$(echo "$line")
+    if [[ $last != 0x0 ]]; then
+
+	    if [[ $i > 0 ]]; then
+		    cur_time=$(date +%s)
+
+		    diff_total_sec=$(echo "$cur_time - $last_time" | bc)
+
+		    #diff_hours=$( echo "$diff_total_sec / 3600" | bc)
+		    #rest_after_hours=$( echo "$diff_total_sec % 3600" | bc)
+
+		    #diff_minutes=$( echo "$diff_total_sec / 60" | bc)
+
+		    #echo "FOCUSED FOR: $diff_minutes min "
+
+		    echo "WM_CLASS: $wm_class"
+		    echo "WM_NAME: $wm_name"
+		    echo "CURRENT TIME: $cur_time_hr"
+
+		    echo "FOCUSED FOR: $diff_total_sec sec"
+
+		    echo
+		    echo "####################################################"
+		    echo
+
+		    echo -e "$wm_class\t$wm_name\t$cur_time_hr\t$diff_total_sec" >> $save_path/${file_name}_${1}.csv
+	    fi
+
+	    wm_class=$(xprop -id $last | grep WM_CLASS | awk -F'=' '{printf $2}' | sed -r 's/"//g' | xargs)
+	    wm_name=$(xprop -id $last | grep NET_WM_NAME | awk -F'=' '{printf $2}' | sed -r 's/"//g' | xargs)
+	    last_time=$cur_time
+
+	    cur_time_hr=$(date +"%Y/%m/%d/%H/%M/%S")
+
+
+	    i=$((i+1))
+    fi
+done
