@@ -1,6 +1,14 @@
 #!/usr/bin/fish
 
-set var (cat ~/.ws-name-history | ilia -p textlist)
+set filename "$HOME/.ws-name-history"
+
+if test -e $filename
+    echo -n
+else
+    touch $filename
+end
+
+set var (cat $filename | ilia -p textlist)
 
 if [ "$var" = "" ]
 	exit
